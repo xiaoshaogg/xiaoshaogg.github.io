@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sell Call年化收益计算器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #e9f7ef;
+      border-left: 6px solid #28a745;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Sell Call年化收益计算器</h2>
+
+  <label>股票买入价（现价）：</label>
+  <input type="number" id="buyPrice" step="0.01" placeholder="例如：10">
+
+  <label>看涨期权行权价：</label>
+  <input type="number" id="strikePrice" step="0.01" placeholder="例如：11">
+
+  <label>权利金收入：</label>
+  <input type="number" id="premium" step="0.01" placeholder="例如：0.5">
+
+  <label>距离到期天数：</label>
+  <input type="number" id="days" placeholder="例如：30">
+
+  <button onclick="calculate()">计算年化收益率</button>
+
+  <div id="result"></div>
+
+  <script>
+    function calculate() {
+      const buyPrice = parseFloat(document.getElementById('buyPrice').value);
+      const strikePrice = parseFloat(document.getElementById('strikePrice').value);
+      const premium = parseFloat(document.getElementById('premium').value);
+      const days = parseInt(document.getElementById('days').value);
+
+      const resultDiv = document.getElementById('result');
+
+      if (
+        isNaN(buyPrice) || isNaN(strikePrice) || isNaN(premium) || isNaN(days) ||
+        buyPrice <= 0 || days <= 0 || (buyPrice - premium) <= 0
+      ) {
+        resultDiv.innerHTML = '<span class="error">请填写所有有效字段，且确保“买入价 - 权利金”大于 0。</span>';
+        return;
+      }
+
+      const totalProfit = strikePrice - buyPrice + premium;
+      const annualizedReturn = (totalProfit / (buyPrice - premium)) * (365 / days) * 100;
+
+      resultDiv.innerHTML = `
+        <strong>总收益：</strong> ¥${totalProfit.toFixed(2)}<br>
+        <strong>年化收益率：</strong> ${annualizedReturn.toFixed(2)}%
+      `;
+    }
+  </script>
+</body>
+</html>

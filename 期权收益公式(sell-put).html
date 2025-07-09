@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Put年化收益计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6a89cc, #1e3799);
+            opacity: 0.1;
+        }
+        
+        .container::after {
+            content: "";
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #7bed9f, #2ed573);
+            opacity: 0.1;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 28px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d1d8e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #6a89cc;
+            box-shadow: 0 0 0 3px rgba(106, 137, 204, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6a89cc 0%, #1e3799 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(106, 137, 204, 0.3);
+            margin-top: 25px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 137, 204, 0.4);
+            background: linear-gradient(135deg, #7c9dff 0%, #2d48c9 100%);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            display: none;
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-header {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-size: 34px;
+            font-weight: 700;
+            text-align: center;
+            color: #1e3799;
+            margin: 10px 0;
+        }
+        
+        .result-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #d1d8e0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #eef1f7;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #566573;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .result-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sell Put年化收益计算器</h1>
+        
+        <div class="form-group">
+            <label for="days">持有天数</label>
+            <input type="number" id="days" min="1" max="365" placeholder="输入期权持有天数">
+        </div>
+        
+        <div class="form-group">
+            <label for="premium">权利金收益</label>
+            <input type="number" id="premium" min="0" step="0.01" placeholder="输入权利金金额">
+        </div>
+        
+        <div class="form-group">
+            <label for="margin">保证金占用</label>
+            <input type="number" id="margin" min="0" step="0.01" placeholder="输入保证金金额">
+        </div>
+        
+        <button id="calculate" class="btn">计算年化收益率</button>
+        
+        <div id="result" class="result">
+            <div class="result-header">年化收益率</div>
+            <div id="resultValue" class="result-value">0%</div>
+            <div class="result-details">
+                <div class="detail-row">
+                    <span>期权利润：</span>
+                    <span id="profit">¥0.00</span>
+                </div>
+                <div class="detail-row">
+                    <span>年化系数：</span>
+                    <span id="annualFactor">0.00</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="note">
+            <p><strong>使用说明：</strong>本计算器仅适用于Sell Put未被行权的情况。计算结果基于公式：年化收益率 = (权利金/保证金占用) × (365/持有天数)。实际交易中请考虑交易成本、滑点等因素。</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculate').addEventListener('click', function() {
+            // 获取输入值
+            const days = parseFloat(document.getElementById('days').value);
+            const premium = parseFloat(document.getElementById('premium').value);
+            const margin = parseFloat(document.getElementById('margin').value);
+            
+            // 验证输入
+            if (isNaN(days) || days <= 0 || isNaN(premium) || premium <= 0 || isNaN(margin) || margin <= 0) {
+                alert('请输入有效的正数数值！');
+                return;
+            }
+            
+            // 执行计算
+            const profit = premium;
+            const annualFactor = 365 / days;
+            const annualYield = (profit / margin) * annualFactor * 100;
+            
+            // 显示结果
+            document.getElementById('resultValue').textContent = annualYield.toFixed(2) + '%';
+            document.getElementById('profit').textContent = '¥' + profit.toFixed(2);
+            document.getElementById('annualFactor').textContent = annualFactor.toFixed(2);
+            
+            // 设置结果颜色
+            if (annualYield >= 30) {
+                document.getElementById('resultValue').style.color = '#27ae60';
+            } else if (annualYield >= 15) {
+                document.getElementById('resultValue').style.color = '#f39c12';
+            } else {
+                document.getElementById('resultValue').style.color = '#e74c3c';
+            }
+            
+            // 显示结果区域
+            document.getElementById('result').style.display = 'block';
+        });
+        
+        // 为输入框添加回车触发功能
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    document.getElementById('calculate').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>期权年化收益计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6a89cc, #1e3799);
+            opacity: 0.1;
+        }
+        
+        .container::after {
+            content: "";
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #7bed9f, #2ed573);
+            opacity: 0.1;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 28px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border: 1px solid #d1d8e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab:first-child {
+            border-radius: 10px 0 0 10px;
+            border-right: none;
+        }
+        
+        .tab:last-child {
+            border-radius: 0 10px 10px 0;
+            border-left: none;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #6a89cc 0%, #1e3799 100%);
+            color: white;
+            border-color: #1e3799;
+        }
+        
+        .tab-content {
+            display: none;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d1d8e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #6a89cc;
+            box-shadow: 0 0 0 3px rgba(106, 137, 204, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6a89cc 0%, #1e3799 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(106, 137, 204, 0.3);
+            margin-top: 25px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 137, 204, 0.4);
+            background: linear-gradient(135deg, #7c9dff 0%, #2d48c9 100%);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            display: none;
+            position: relative;
+            z-index: 2;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .result-header {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-size: 34px;
+            font-weight: 700;
+            text-align: center;
+            color: #1e3799;
+            margin: 10px 0;
+        }
+        
+        .result-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #d1d8e0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #eef1f7;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #566573;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .result-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>期权年化收益计算器</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="put">Sell Put</div>
+            <div class="tab" data-tab="call">Sell Call</div>
+        </div>
+        
+        <!-- Sell Put Tab Content -->
+        <div id="put-tab" class="tab-content active">
+            
+            <div class="form-group">
+                <label for="put-premium">权利金收入</label>
+                <input type="number" id="put-premium" min="0" step="0.01" placeholder="权利金">
+            </div>
+            
+            <div class="form-group">
+                <label for="put-strikePrice">行权价</label>
+                <input type="number" id="put-strikePrice" min="0" step="0.01" placeholder="行权价">
+            </div>
+            
+            <div class="form-group">
+                <label for="put-days">到期天数</label>
+                <input type="number" id="put-days" min="1" max="365" placeholder="到期天数">
+            </div>
+
+            <button id="calculate-put" class="btn">计算年化收益率</button>
+            
+            <div id="put-result" class="result">
+                <div class="result-header">年化收益率</div>
+                <div id="put-resultValue" class="result-value">0%</div>
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span>期权利润：</span>
+                        <span id="put-profit">¥0.00</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>年化系数：</span>
+                        <span id="put-annualFactor">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sell Call Tab Content -->
+        <div id="call-tab" class="tab-content">
+            <div class="form-group">
+                <label for="call-buyPrice">现价</label>
+                <input type="number" id="call-buyPrice" step="0.01" placeholder="现价">
+            </div>
+
+            <div class="form-group">
+                <label for="call-premium">权利金收入</label>
+                <input type="number" id="call-premium" step="0.01" placeholder="权利金">
+            </div>
+            
+            <div class="form-group">
+                <label for="call-strikePrice">行权价</label>
+                <input type="number" id="call-strikePrice" step="0.01" placeholder="行权价">
+            </div>
+            
+            <div class="form-group">
+                <label for="call-days">到期天数</label>
+                <input type="number" id="call-days" placeholder="到期天数">
+            </div>
+            
+            <button id="calculate-call" class="btn">计算年化收益率</button>
+            
+            <div id="call-result" class="result">
+                <div class="result-header">年化收益率</div>
+                <div id="call-resultValue" class="result-value">0%</div>
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span>总收益：</span>
+                        <span id="call-totalProfit">¥0.00</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>投资金额：</span>
+                        <span id="call-investment">¥0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="note">
+            <p><strong>使用说明：</strong></p>
+            <p><strong>Sell Put计算器</strong>适用于未被行权的情况，计算公式：年化收益率 = (权利金/(行权价-权利金)) × (365/到期天数)</p>
+            <p><strong>Sell Call计算器</strong>适用于被行权的情况，计算公式：年化收益率 = (行权价-现价+权利金)/(现价-权利金) × (365/到期天数)</p>
+            <p>实际交易中请考虑交易成本、滑点等因素。</p>
+        </div>
+    </div>
+
+    <script>
+        // Tab切换功能
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有tab和content的active类
+                tabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // 添加active类到当前tab和对应content
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // Sell Put计算功能
+        document.getElementById('calculate-put').addEventListener('click', function() {
+            // 获取输入值
+            const days = parseFloat(document.getElementById('put-days').value);
+            const premium = parseFloat(document.getElementById('put-premium').value);
+            const strikePrice = parseFloat(document.getElementById('put-strikePrice').value);
+            
+            // 验证输入
+            if (isNaN(days) || days <= 0 || isNaN(premium) || premium <= 0 || isNaN(strikePrice) || strikePrice <= 0) {
+                alert('请输入有效的正数数值！');
+                return;
+            }
+            
+            // 执行计算
+            const profit = premium;
+            const annualFactor = 365 / days;
+            const annualYield = (profit / (strikePrice-premium)) * annualFactor * 100;
+            
+            // 显示结果
+            document.getElementById('put-resultValue').textContent = annualYield.toFixed(2) + '%';
+            document.getElementById('put-profit').textContent = '¥' + profit.toFixed(2);
+            document.getElementById('put-annualFactor').textContent = annualFactor.toFixed(2);
+            
+            // 设置结果颜色
+            setResultColor(document.getElementById('put-resultValue'), annualYield);
+            
+            // 显示结果区域
+            document.getElementById('put-result').style.display = 'block';
+        });
+        
+        // Sell Call计算功能
+        document.getElementById('calculate-call').addEventListener('click', function() {
+            const buyPrice = parseFloat(document.getElementById('call-buyPrice').value);
+            const strikePrice = parseFloat(document.getElementById('call-strikePrice').value);
+            const premium = parseFloat(document.getElementById('call-premium').value);
+            const days = parseInt(document.getElementById('call-days').value);
+            
+            if (
+                isNaN(buyPrice) || isNaN(strikePrice) || isNaN(premium) || isNaN(days) ||
+                buyPrice <= 0 || days <= 0 || (buyPrice - premium) <= 0
+            ) {
+                alert('请填写所有有效字段，且确保"买入价 - 权利金"大于 0。');
+                return;
+            }
+            
+            const totalProfit = strikePrice - buyPrice + premium;
+            const investment = buyPrice - premium;
+            const annualizedReturn = (totalProfit / investment) * (365 / days) * 100;
+            
+            document.getElementById('call-resultValue').textContent = annualizedReturn.toFixed(2) + '%';
+            document.getElementById('call-totalProfit').textContent = '¥' + totalProfit.toFixed(2);
+            document.getElementById('call-investment').textContent = '¥' + investment.toFixed(2);
+            
+            setResultColor(document.getElementById('call-resultValue'), annualizedReturn);
+            
+            document.getElementById('call-result').style.display = 'block';
+        });
+        
+        // 设置结果颜色函数
+        function setResultColor(element, value) {
+            if (value >= 30) {
+                element.style.color = '#27ae60';
+            } else if (value >= 15) {
+                element.style.color = '#f39c12';
+            } else {
+                element.style.color = '#e74c3c';
+            }
+        }
+        
+        // 为输入框添加回车触发功能
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+                    document.getElementById(`calculate-${activeTab}`).click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
