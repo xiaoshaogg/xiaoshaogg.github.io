@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投资决策评估工具 - 托德·库姆斯三原则</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .quote {
+            background-color: #e3f2fd;
+            border-left: 4px solid var(--secondary);
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .models-container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .model-section {
+            flex: 1;
+            min-width: 300px;
+            background: var(--light);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .model-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+        
+        .criteria {
+            margin-bottom: 20px;
+        }
+        
+        .criteria h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .rating-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .rating-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 2px solid transparent;
+        }
+        
+        .rating-option:hover {
+            transform: translateY(-3px);
+        }
+        
+        .rating-option.selected {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .rating-option.A { background-color: rgba(39, 174, 96, 0.2); }
+        .rating-option.A.selected { border-color: var(--success); background-color: rgba(39, 174, 96, 0.3); }
+        
+        .rating-option.B { background-color: rgba(243, 156, 18, 0.2); }
+        .rating-option.B.selected { border-color: var(--warning); background-color: rgba(243, 156, 18, 0.3); }
+        
+        .rating-option.C { background-color: rgba(231, 76, 60, 0.2); }
+        .rating-option.C.selected { border-color: var(--danger); background-color: rgba(231, 76, 60, 0.3); }
+        
+        .price-option { background-color: rgba(52, 152, 219, 0.2); }
+        .price-option.selected { border-color: var(--secondary); background-color: rgba(52, 152, 219, 0.3); }
+        
+        .calculate-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+        
+        .calculate-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .result-container {
+            padding: 30px;
+            background: var(--light);
+            border-radius: 10px;
+            margin: 20px;
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .result-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .result-card {
+            flex: 1;
+            min-width: 250px;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            background: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .result-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .result-rating {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .final-result {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        .result-success {
+            background-color: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+        }
+        
+        .result-warning {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning);
+        }
+        
+        .result-danger {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+        
+        .principle-explanation {
+            padding: 25px;
+            background: #f0f7ff;
+            border-top: 1px solid #d1e7ff;
+        }
+        
+        .principle-explanation h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .principle {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .principle h3 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .models-container {
+                flex-direction: column;
+            }
+            
+            .model-section {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>投资决策评估工具</h1>
+            <p>基于托德·库姆斯（巴菲特投资接班人）的三个简化投资原则</p>
+        </header>
+        
+        <div class="quote">
+            "投资中的三个简化原则：发掘优质公司、寻找出色的管理团队，以及确定合理价格。这三者不是加法，而是乘法。只要有一项为零，整个投资决策就失去了意义。"
+        </div>
+        
+        <div class="models-container">
+            <div class="model-section">
+                <h2 class="model-title">企业模型评估</h2>
+                
+                <div class="criteria">
+                    <h3>1. 低资本密集度</h3>
+                    <p>企业运营所需资本投入较少，自由现金流充裕</p>
+                    <div class="rating-options">
+                        <div class="rating-option A" data-criteria="capital" data-value="A">A</div>
+                        <div class="rating-option B" data-criteria="capital" data-value="B">B</div>
+                        <div class="rating-option C" data-criteria="capital" data-value="C">C</div>
+                    </div>
+                </div>
+                
+                <div class="criteria">
+                    <h3>2. 定价主导权</h3>
+                    <p>企业拥有定价能力，可以不受竞争影响提高价格</p>
+                    <div class="rating-options">
+                        <div class="rating-option A" data-criteria="pricing" data-value="A">A</div>
+                        <div class="rating-option B" data-criteria="pricing" data-value="B">B</div>
+                        <div class="rating-option C" data-criteria="pricing" data-value="C">C</div>
+                    </div>
+                </div>
+                
+                <div class="criteria">
+                    <h3>3. 稳定的经常性收入</h3>
+                    <p>企业收入可预测、稳定，有经常性收入来源</p>
+                    <div class="rating-options">
+                        <div class="rating-option A" data-criteria="revenue" data-value="A">A</div>
+                        <div class="rating-option B" data-criteria="revenue" data-value="B">B</div>
+                        <div class="rating-option C" data-criteria="revenue" data-value="C">C</div>
+                    </div>
+                </div>
+                
+                <div class="criteria">
+                    <h3>4. 持久的市场地位</h3>
+                    <p>企业拥有强大的竞争优势和护城河</p>
+                    <div class="rating-options">
+                        <div class="rating-option A" data-criteria="position" data-value="A">A</div>
+                        <div class="rating-option B" data-criteria="position" data-value="B">B</div>
+                        <div class="rating-option C" data-criteria="position" data-value="C">C</div>
+                    </div>
+                </div>
+                
+                <div class="criteria">
+                    <h3>5. 长期增长潜力</h3>
+                    <p>企业在未来有可持续的增长前景</p>
+                    <div class="rating-options">
+                        <div class="rating-option A" data-criteria="growth" data-value="A">A</div>
+                        <div class="rating-option B" data-criteria="growth" data-value="B">B</div>
+                        <div class="rating-option C" data-criteria="growth" data-value="C">C</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="model-section">
+                <h2 class="model-title">管理层评估</h2>
+                
+                <div class="criteria">
+                    <h3>管理团队质量</h3>
+                    <p>评估管理层的诚信、能力和股东利益一致性</p>
+                    <div class="rating-options">
+                        <div class="rating-option A" data-criteria="management" data-value="A">A</div>
+                        <div class="rating-option B" data-criteria="management" data-value="B">B</div>
+                        <div class="rating-option C" data-criteria="management" data-value="C">C</div>
+                    </div>
+                </div>
+                
+                <div class="criteria">
+                    <h3>评估说明</h3>
+                    <p><strong>A级</strong>: 卓越管理层，有长期成功记录，与股东利益高度一致</p>
+                    <p><strong>B级</strong>: 合格管理层，有能力但缺乏杰出表现</p>
+                    <p><strong>C级</strong>: 管理层存在诚信问题或能力不足</p>
+                </div>
+            </div>
+            
+            <div class="model-section">
+                <h2 class="model-title">价格评估</h2>
+                
+                <div class="criteria">
+                    <h3>当前估值水平</h3>
+                    <p>基于企业基本面和未来现金流评估</p>
+                    <div class="rating-options">
+                        <div class="rating-option price-option" data-criteria="price" data-value="undervalued">低估</div>
+                        <div class="rating-option price-option" data-criteria="price" data-value="reasonable">合理</div>
+                        <div class="rating-option price-option" data-criteria="price" data-value="overvalued">过高</div>
+                    </div>
+                </div>
+                
+                <div class="criteria">
+                    <h3>评估说明</h3>
+                    <p><strong>低估</strong>: 价格显著低于内在价值，有安全边际</p>
+                    <p><strong>合理</strong>: 价格基本反映企业内在价值</p>
+                    <p><strong>过高</strong>: 价格高于内在价值，风险较大</p>
+                </div>
+            </div>
+        </div>
+        
+        <button id="calculate-btn" class="calculate-btn">评估投资决策</button>
+        
+        <div id="result-container" class="result-container">
+            <h2 class="result-title">投资评估结果</h2>
+            <div class="result-content">
+                <div class="result-card">
+                    <h3>企业模型</h3>
+                    <div id="business-rating" class="result-rating">-</div>
+                    <div id="business-details"></div>
+                </div>
+                <div class="result-card">
+                    <h3>管理层</h3>
+                    <div id="management-rating" class="result-rating">-</div>
+                    <div id="management-details"></div>
+                </div>
+                <div class="result-card">
+                    <h3>价格</h3>
+                    <div id="price-rating" class="result-rating">-</div>
+                    <div id="price-details"></div>
+                </div>
+            </div>
+            
+            <div id="final-result" class="final-result">
+                <!-- 结果将在这里显示 -->
+            </div>
+        </div>
+        
+        <div class="principle-explanation">
+            <h2>托德·库姆斯投资三原则</h2>
+            
+            <div class="principle">
+                <h3>发掘优质公司</h3>
+                <p>优质企业应具备的结构性特征：低资本密集度、定价主导权、稳定的经常性收入、持久的市场地位和长期增长潜力。这些特征使企业能够持续产生高资本回报率。</p>
+            </div>
+            
+            <div class="principle">
+                <h3>寻找出色的管理团队</h3>
+                <p>优秀的管理层能够有效配置资本，做出明智的战略决策，并以股东利益为导向。管理层诚信和能力直接影响企业长期价值的创造。</p>
+            </div>
+            
+            <div class="principle">
+                <h3>确定合理价格</h3>
+                <p>价格是投资成功的关键因素。安全边际原则要求以显著低于内在价值的价格买入，以应对未来的不确定性。完美的信息不存在，只能依靠可信区间进行决策。</p>
+            </div>
+            
+            <div class="principle">
+                <h3>乘法原则</h3>
+                <p>这三个要素不是加法关系，而是乘法关系：优质公司 × 优秀管理层 × 合理价格。任何一个要素为零（不合格），整个投资决策就会失去意义。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 存储当前选择
+            const selections = {
+                capital: null,
+                pricing: null,
+                revenue: null,
+                position: null,
+                growth: null,
+                management: null,
+                price: null
+            };
+            
+            // 设置评级选项的事件监听器
+            document.querySelectorAll('.rating-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const criteria = this.dataset.criteria;
+                    const value = this.dataset.value;
+                    
+                    // 移除同一标准下的所有选中状态
+                    document.querySelectorAll(`[data-criteria="${criteria}"]`).forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    
+                    // 设置当前选中
+                    this.classList.add('selected');
+                    selections[criteria] = value;
+                });
+            });
+            
+            // 计算按钮事件
+            document.getElementById('calculate-btn').addEventListener('click', function() {
+                // 检查所有选项是否已选择
+                const allSelected = Object.values(selections).every(value => value !== null);
+                
+                if (!allSelected) {
+                    alert('请完成所有评估选项！');
+                    return;
+                }
+                
+                // 计算企业模型综合评级（取最低评级）
+                const businessRatings = [
+                    selections.capital,
+                    selections.pricing,
+                    selections.revenue,
+                    selections.position,
+                    selections.growth
+                ];
+                
+                const businessRating = businessRatings.includes('C') ? 'C' : 
+                                      businessRatings.includes('B') ? 'B' : 'A';
+                
+                // 更新结果显示
+                document.getElementById('business-rating').textContent = businessRating;
+                document.getElementById('business-rating').className = `result-rating ${businessRating === 'A' ? 'result-success' : businessRating === 'B' ? 'result-warning' : 'result-danger'}`;
+                
+                document.getElementById('management-rating').textContent = selections.management;
+                document.getElementById('management-rating').className = `result-rating ${selections.management === 'A' ? 'result-success' : selections.management === 'B' ? 'result-warning' : 'result-danger'}`;
+                
+                document.getElementById('price-rating').textContent = selections.price === 'overvalued' ? '过高' : selections.price === 'reasonable' ? '合理' : '低估';
+                document.getElementById('price-rating').className = `result-rating ${selections.price === 'undervalued' ? 'result-success' : selections.price === 'reasonable' ? 'result-warning' : 'result-danger'}`;
+                
+                // 评估最终结果
+                let resultText = '';
+                let resultClass = '';
+                
+                // 乘法原则：任何一项为C/过高即不合格
+                if (businessRating === 'C' || selections.management === 'C' || selections.price === 'overvalued') {
+                    resultText = '放弃投资：至少有一项关键因素不合格';
+                    resultClass = 'result-danger';
+                } 
+                // 有两项为B级
+                else if (
+                    (businessRating === 'B' && selections.management === 'B') ||
+                    (businessRating === 'B' && selections.price === 'reasonable') ||
+                    (selections.management === 'B' && selections.price === 'reasonable')
+                ) {
+                    resultText = '谨慎投资：有两项因素为中等评级';
+                    resultClass = 'result-warning';
+                } 
+                // 有一项为B级
+                else if (businessRating === 'B' || selections.management === 'B' || selections.price === 'reasonable') {
+                    resultText = '可以考虑：有一项因素为中等评级';
+                    resultClass = 'result-warning';
+                } 
+                // 所有都是A级
+                else {
+                    resultText = '卓越投资机会：所有因素均为最佳评级';
+                    resultClass = 'result-success';
+                }
+                
+                document.getElementById('final-result').textContent = resultText;
+                document.getElementById('final-result').className = `final-result ${resultClass}`;
+                
+                // 显示结果容器
+                document.getElementById('result-container').style.display = 'block';
+                
+                // 滚动到结果区域
+                document.getElementById('result-container').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
