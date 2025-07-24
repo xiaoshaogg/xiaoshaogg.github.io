@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>股票估值计算器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Ant Design -->
+  <link rel="stylesheet" href="https://unpkg.com/antd/dist/antd.min.css" />
+  <style>
+    body { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <!-- React & Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/antd/dist/antd.min.js"></script>
+  <script src="https://unpkg.com/styled-components/dist/styled-components.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+
+    const { useState } = React;
+    const { Select, InputNumber, Card, Typography } = antd;
+    const { Title } = Typography;
+    const styled = window.styled;
+
+    const Container = styled.div`
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    `;
+
+    const FormItem = styled.div`
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    `;
+
+    const Label = styled.div`
+      width: 200px;
+      margin-right: 20px;
+      font-weight: bold;
+    `;
+
+    const ValueDisplay = styled.div`
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    `;
+
+    function App() {
+      const [companyType, setCompanyType] = useState('非周期性行业');
+      const [cashFlowType, setCashFlowType] = useState('归母净利润');
+      const [freeCashFlow, setFreeCashFlow] = useState(0);
+      const [growthRate, setGrowthRate] = useState(10);
+      const [minPE, setMinPE] = useState(25);
+      const [maxPE, setMaxPE] = useState(30);
+
+      const calculateLowValue = () => {
+        const pe = minPE;
+        const growth = Math.pow(1 + growthRate / 100, 3);
+        const peWithGrowth = Math.min(pe * growth / 2, pe * 0.7);
+        return (freeCashFlow * peWithGrowth).toFixed(2);
+      };
+
+      const calculateHighValue = () => {
+        return (freeCashFlow * 50).toFixed(2);
+      };
+
+      return (
+        <Container>
+          <Title level={2}>股票估值计算器</Title>
+          <Card>
+            <FormItem>
+              <Label>企业类型</Label>
+              <Select
+                style={{ width: 200 }}
+                value={companyType}
+                onChange={setCompanyType}
+                options={[
+                  { value: '非周期性行业', label: '非周期性行业' },
+                ]}
+              />
+            </FormItem>
+
+            <FormItem>
+              <Label>自由现金流</Label>
+              <Select
+                style={{ width: 200 }}
+                value={cashFlowType}
+                onChange={setCashFlowType}
+                options={[
+                  { value: '归母净利润', label: '归母净利润' },
+                  { value: '非国际净利润', label: '非国际净利润' },
+                ]}
+              />
+            </FormItem>
+
+            <FormItem>
+              <Label>现金流数值（亿元）</Label>
+              <InputNumber
+                style={{ width: 200 }}
+                value={freeCashFlow}
+                onChange={(value) => setFreeCashFlow(value || 0)}
+              />
+            </FormItem>
+
+            <FormItem>
+              <Label>未来三年年均增长率 (%)</Label>
+              <InputNumber
+                style={{ width: 200 }}
+                value={growthRate}
+                onChange={(value) => setGrowthRate(value || 0)}
+                min={10}
+                max={20}
+              />
+            </FormItem>
+
+            <FormItem>
+              <Label>合理市盈率范围</Label>
+              <InputNumber
+                style={{ width: 95 }}
+                value={minPE}
+                onChange={(value) => setMinPE(value || 0)}
+              />
+              <span style={{ margin: '0 10px' }}>~</span>
+              <InputNumber
+                style={{ width: 95 }}
+                value={maxPE}
+                onChange={(value) => setMaxPE(value || 0)}
+              />
+            </FormItem>
+
+            <ValueDisplay>
+              <div>
+                <Title level={4}>理想低估值（市值亿元）</Title>
+                <div style={{ color: '#ff4d4f', fontSize: '20px' }}>
+                  {calculateLowValue()}
+                </div>
+                <Label>理想低估值：自由现金流Min *（Min（合理市盈率） * （1 + 未来三年年均增长）^ 3, Min（合理市盈率）* 0.7）</Label>
+                <Label>一年内高估值：自由现金流 * 50 </Label>
+              </div>
+              <div>
+                <Title level={4}>一年内高估值（市值亿元）</Title>
+                <div style={{ color: '#52c41a', fontSize: '20px' }}>
+                  {calculateHighValue()}
+                </div>
+              </div>
+            </ValueDisplay>
+          </Card>
+        </Container>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html> 
