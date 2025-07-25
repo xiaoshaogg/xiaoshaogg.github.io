@@ -6,3 +6,6 @@
 
 # Todd Combs选股模型
 <https://xiaoshaogg.github.io/todd.html>
+
+# 老唐估值法
+<https://xiaoshaogg.github.io/tang.html>
