@@ -1,160 +1,217 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <title>股票估值计算器</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Ant Design -->
-  <link rel="stylesheet" href="https://unpkg.com/antd/dist/antd.min.css" />
+  <meta charset="UTF-8">
+  <title>唐氏估值计算器</title>
   <style>
-    body { background: #f5f5f5; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+    }
+        
+    .container::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #6a89cc, #1e3799);
+            opacity: 0.1;
+    }
+        
+    .container::after {
+            content: "";
+            position: absolute;
+            bottom: -40px;
+            left: -40px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #7bed9f, #2ed573);
+            opacity: 0.1;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: #2c3e50;
+      position: relative;
+      z-index: 2;
+    }
+
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-top: 20px;
+      position: relative;
+      z-index: 2;
+    }
+    .form-group label {
+      width: 160px;
+      margin-right: 10px;
+      color: #333;
+      font-weight: bold;
+    }
+    .form-group input,
+    .form-group select {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      background-color: #f9f9f9;
+    }
+    .form-group > div {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+    }
+    .form-group > div input {
+      flex: 1;
+    }
+    .result {
+      margin-top: 30px;
+      font-size: 18px;
+      position: relative;
+      z-index: 2;
+    }
+    .value {
+      font-weight: bold;
+      color: green;
+    }
+    .low {
+      color: red;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 20px;
+      }
+      .container {
+        padding: 20px;
+      }
+      .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-group label,
+      .form-group input,
+      .form-group select,
+      .form-group > div {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <!-- React & Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/antd/dist/antd.min.js"></script>
-  <script src="https://unpkg.com/styled-components/dist/styled-components.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
+  <div class="container">
 
-    const { useState } = React;
-    const { Select, InputNumber, Card, Typography } = antd;
-    const { Title } = Typography;
-    const styled = window.styled;
+  <h2>企业估值计算器</h2>
 
-    const Container = styled.div`
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    `;
+  <div class="form-group">
+    <label>企业类型</label>
+    <select id="industryType">
+      <option>非周期性行业</option>
+      <option>周期性行业</option>
+    </select>
+  </div>
 
-    const FormItem = styled.div`
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-    `;
+  <div class="form-group">
+    <label>自由现金流</label>
+    <select id="cashFlowType">
+      <option>归母净利润</option>
+      <option>非国际净利润</option>
+    </select>
+  </div>
 
-    const Label = styled.div`
-      width: 200px;
-      margin-right: 20px;
-      font-weight: bold;
-    `;
+  <div class="form-group">
+    <label>现金流数值（亿元）</label>
+    <input type="number" id="cashFlow" value="0" />
+  </div>
 
-    const ValueDisplay = styled.div`
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    `;
+  <div class="form-group">
+    <label>未来三年年均增长率（%）</label>
+    <select id="growthRate">
+      <option value="8">8%</option>
+      <option value="10" selected>10%</option>
+      <option value="12.5">12.5%</option>
+      <option value="15">15%</option>
+    </select>
+  </div>
 
-    function App() {
-      const [companyType, setCompanyType] = useState('非周期性行业');
-      const [cashFlowType, setCashFlowType] = useState('归母净利润');
-      const [freeCashFlow, setFreeCashFlow] = useState(0);
-      const [growthRate, setGrowthRate] = useState(10);
-      const [minPE, setMinPE] = useState(25);
-      const [maxPE, setMaxPE] = useState(30);
+  <div class="form-group">
+    <label>合理市盈率范围</label>
+    <div>
+      <input type="number" id="peMin" value="25" />
+      <input type="number" id="peMax" value="30" />
+    </div>
+  </div>
 
-      const calculateLowValue = () => {
-        const pe = minPE;
-        const growth = Math.pow(1 + growthRate / 100, 3);
-        const peWithGrowth = Math.min(pe * growth / 2, pe * 0.7);
-        return (freeCashFlow * peWithGrowth).toFixed(2);
-      };
+  <div class="result">
+    <p>理想低估市值（亿元）：
+      <span id="lowVal" class="value low">0.00</span>
+    </p>
+    <p>年内高估市值（亿元）：
+      <span id="highVal" class="value">0.00</span>
+    </p>
+  </div>
 
-      const calculateHighValue = () => {
-        return (freeCashFlow * 50).toFixed(2);
-      };
+  <script>
+    const cashFlowInput = document.getElementById("cashFlow");
+    const growthRateInput = document.getElementById("growthRate");
+    const peMinInput = document.getElementById("peMin");
+    const peMaxInput = document.getElementById("peMax");
+    const lowValEl = document.getElementById("lowVal");
+    const highValEl = document.getElementById("highVal");
 
-      return (
-        <Container>
-          <Title level={2}>股票估值计算器</Title>
-          <Card>
-            <FormItem>
-              <Label>企业类型</Label>
-              <Select
-                style={{ width: 200 }}
-                value={companyType}
-                onChange={setCompanyType}
-                options={[
-                  { value: '非周期性行业', label: '非周期性行业' },
-                ]}
-              />
-            </FormItem>
+    function calculate() {
+      const cashFlow = parseFloat(cashFlowInput.value) || 0;
+      const growthRate = parseFloat(growthRateInput.value) / 100;
+      const peMin = parseFloat(peMinInput.value);
+      const peMax = parseFloat(peMaxInput.value);
 
-            <FormItem>
-              <Label>自由现金流</Label>
-              <Select
-                style={{ width: 200 }}
-                value={cashFlowType}
-                onChange={setCashFlowType}
-                options={[
-                  { value: '归母净利润', label: '归母净利润' },
-                  { value: '非国际净利润', label: '非国际净利润' },
-                ]}
-              />
-            </FormItem>
+      const projectedPE = peMin * Math.pow(1 + growthRate, 3) / 2;
+      const conservativePE = peMax * 0.7;
+      const lowPE = Math.min(projectedPE, conservativePE);
+      const idealLowValue = cashFlow * lowPE;
 
-            <FormItem>
-              <Label>现金流数值（亿元）</Label>
-              <InputNumber
-                style={{ width: 200 }}
-                value={freeCashFlow}
-                onChange={(value) => setFreeCashFlow(value || 0)}
-              />
-            </FormItem>
+      const highValue = cashFlow * 50;
 
-            <FormItem>
-              <Label>未来三年年均增长率 (%)</Label>
-              <InputNumber
-                style={{ width: 200 }}
-                value={growthRate}
-                onChange={(value) => setGrowthRate(value || 0)}
-                min={10}
-                max={20}
-              />
-            </FormItem>
-
-            <FormItem>
-              <Label>合理市盈率范围</Label>
-              <InputNumber
-                style={{ width: 95 }}
-                value={minPE}
-                onChange={(value) => setMinPE(value || 0)}
-              />
-              <span style={{ margin: '0 10px' }}>~</span>
-              <InputNumber
-                style={{ width: 95 }}
-                value={maxPE}
-                onChange={(value) => setMaxPE(value || 0)}
-              />
-            </FormItem>
-
-            <ValueDisplay>
-              <div>
-                <Title level={4}>理想低估值（市值亿元）</Title>
-                <div style={{ color: '#ff4d4f', fontSize: '20px' }}>
-                  {calculateLowValue()}
-                </div>
-                <Label>理想低估值：自由现金流Min *（Min（合理市盈率） * （1 + 未来三年年均增长）^ 3, Min（合理市盈率）* 0.7）</Label>
-                <Label>一年内高估值：自由现金流 * 50 </Label>
-              </div>
-              <div>
-                <Title level={4}>一年内高估值（市值亿元）</Title>
-                <div style={{ color: '#52c41a', fontSize: '20px' }}>
-                  {calculateHighValue()}
-                </div>
-              </div>
-            </ValueDisplay>
-          </Card>
-        </Container>
-      );
+      lowValEl.textContent = idealLowValue.toFixed(2);
+      highValEl.textContent = highValue.toFixed(2);
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    document.querySelectorAll("input, select").forEach(el => {
+      el.addEventListener("input", calculate);
+      el.addEventListener("change", calculate);
+    });
+
+    calculate();
   </script>
+
+  <div style="margin-top: 40px; font-size: 14px; color: #555; position: relative; z-index: 2;">
+    <h4>计算公式说明：</h4>
+    <p>理想低估市值 = 自由现金流 × Min(合理市盈率下沿 × (1 + 年增长率)^3 ÷ 2, 合理市盈率上沿 × 0.7)</p>
+    <p>年内高估市值 = 自由现金流 × 50</p>
+  </div>
+
+  </div>
 </body>
-</html> 
+</html>
